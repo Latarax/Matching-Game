@@ -124,3 +124,44 @@
     return 0;
 
     */
+
+/*
+int i;
+    int playerSize = 2;
+    for (i = 0; i < playerSize; i++)
+    {
+        if (players[i].isTurn)
+        {
+            players[i].points += 2;
+            players[i].isTurn = false;
+            
+            printf("2 cards given to Player %d", i+1);
+            if (i == playerSize-1)
+            {
+                players[0].isTurn = true;
+            }
+            else
+            {
+                players[i+1].isTurn = true;
+            }                    
+        }
+        break;
+    }
+*/
+
+/* code for inside checkMatch
+
+
+    for (i = 0; i < 18; i++)
+    {
+        if (i == flipIndex) {continue;}
+
+        if (cards[i].cardFace == cards[flipIndex].cardFace && cards[i].isFlipped && cards[flipIndex].isFlipped)
+        {
+            cards[i].isMatched = true;
+            cards[flipIndex].isMatched = true;
+            printf("MATCH! Cards %c and %c matched with the symbol %c\n", cards[i].cardLetter, cards[flipIndex].cardLetter, cards[flipIndex].cardFace);            
+            return 0;
+        }
+    }
+*/

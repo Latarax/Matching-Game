@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+// boolean functionality
 typedef enum { false, true } bool;
 
+// player prototype
 struct players_struct
 {
     int playerID;
@@ -25,9 +27,11 @@ struct cards_struct
 
 typedef struct cards_struct card;
 
+// function prototypes
 void printBoard(card cards[]);
-int flipCard(card cards[], char cardToFlip[], int* flipPtr);
-int checkMatch(card cards[], int flipIndex);
+int flipCard(card cards[], char cardToFlip[], int* flipPtr, player players[]);
+int checkMatch(card cards[], char firstCard[], char secondCard[], int* flipPtr, player players[]);
+void pointAllocation(card cards[], player players[]);
 
 
 int main()
@@ -36,10 +40,10 @@ int main()
     time_t t;    
     srand((unsigned) time(&t));
     
-    printf("Two players (for now, will update)\n");
     // scanf(numPlayers);
     // player players[numPlayers];
 
+    // initializing player count (player functionality not working at the moment)
     player players[2];
 
     int i;
@@ -83,42 +87,54 @@ int main()
 
     printBoard(cards);
 
+    players[0].isTurn = true;
+
+    // game loop
     while(numFlipped < 18) 
     {
         char firstCard[1];
-        printf("Choose first card to flip: ");
+        printf("Choose first card to flip (only first letter of input will be read): ");
         scanf("%s", firstCard);
 
-        while(flipCard(cards, firstCard, flipPtr) == 1)
+        while(flipCard(cards, firstCard, flipPtr, players) == 1)
         {
-            printf("Please choose a valid card from the board: ");
+            printf("Please choose a valid card from the board: \n");
             scanf("%s", firstCard);
         }
 
+        printBoard(cards);
+
         char secondCard[1];
-        printf("Choose second card to flip: ");
+        printf("Choose second card to flip (only first letter of input will be read): ");
         scanf("%s", secondCard);
 
-        while(flipCard(cards, secondCard, flipPtr) == 1)
+        while(flipCard(cards, secondCard, flipPtr, players) == 1)
         {
-            printf("Please choose a valid card from the board: ");
+            printf("Please choose a valid card from the board: \n");
             scanf("%s", secondCard);
         }
 
         printf("\n\n");
 
         printBoard(cards);
+
+        checkMatch(cards, firstCard, secondCard, flipPtr, players);
     }
 
     printf("GAME OVER!");
+
+    // for (i = 0; i < 2; i++)
+    // {
+    //     printf("Player %d: %d\n", i+1, players[i].points);
+    // }
     
     return 0;
 }
 
-// function to print current state of board
+// function to print current state of board. 3 for loops used for formatting
 void printBoard(card cards[])
 {
-    printf("Current Game Board\n\n");
+    printf("\nCurrent Game Board\n\n");
     char x;
     int y = 0;
     for (x = 'a'; x != 'g'; x++)
@@ -168,7 +184,7 @@ void printBoard(card cards[])
 }
 
 // function that flips card and updates count of flipped cards
-int flipCard(card cards[], char cardToFlip[], int* flipPtr)
+int flipCard(card cards[], char cardToFlip[], int* flipPtr, player players[])
 {
     int i;
     for (i = 0; i < 18; i++)
@@ -177,8 +193,6 @@ int flipCard(card cards[], char cardToFlip[], int* flipPtr)
         {
             if (cards[i].isFlipped) {return 1;}
             cards[i].isFlipped = true;
-            checkMatch(cards, i);
-            //cards[i].cardLetter = cards[i].cardFace;
             *flipPtr += 1;
             return 0;
         }
@@ -186,21 +200,53 @@ int flipCard(card cards[], char cardToFlip[], int* flipPtr)
     return 1;
 }
 
-int checkMatch(card cards[], int flipIndex)
+// function that checks if flipped cards match. If not, cards will be flipped back and count is updated.
+int checkMatch(card cards[], char firstCard[], char secondCard[], int* flipPtr, player players[])
 {
-    int i;
+    int i, firstIndex, secondIndex;
+
     for (i = 0; i < 18; i++)
     {
-        if (i == flipIndex) {continue;}
-
-        if (cards[i].cardFace == cards[flipIndex].cardFace && cards[i].isFlipped && cards[flipIndex].isFlipped)
+        if (cards[i].cardLetter == firstCard[0])
         {
-            cards[i].isMatched = true;
-            cards[flipIndex].isMatched = true;
-
-            printf("MATCH! Cards %c and %c matched with the symbol %c\n", cards[i].cardLetter, cards[flipIndex].cardLetter, cards[flipIndex].cardFace);
-            return 0;
+            firstIndex = i;
         }
     }
+
+    for (i = 0; i < 18; i++)
+    {
+        if (i == firstIndex) {continue;}
+
+        if (cards[i].cardLetter == secondCard[0])
+        {
+            secondIndex = i;
+        }
+    }
+
+    if (cards[firstIndex].cardFace == cards[secondIndex].cardFace)
+    {
+        cards[firstIndex].isMatched = true;
+        cards[secondIndex].isMatched = true;
+        printf("MATCH! Cards %c and %c matched with the symbol %c\n\n", cards[firstIndex].cardLetter, cards[secondIndex].cardLetter, cards[secondIndex].cardFace);            
+        return 0;
+    }
+    else
+    {
+        cards[firstIndex].isFlipped = false;
+        cards[secondIndex].isFlipped = false;
+        *flipPtr -= 2;
+        printf("NO MATCH! Next turn.\n\n");
+    }
+    
+    
     return 1;
+}
+
+// function for allocating points to players
+void pointAllocation(card cards[], player players[])
+{
+    if (players[0].isTurn)
+    {
+        players[0].points += 2;
+    }
 }
